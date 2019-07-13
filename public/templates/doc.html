@@ -1,0 +1,28 @@
+<table class="table table-condensed">
+    <tbody>
+      <tr>
+        <td>Phatality actions:</td><td>
+          <button ng-click="submitToPhab(flattened)"
+            tooltip-append-to-body="1"
+            tooltip="Submit this error to Phabricator.">
+            <i class="fa fa-plus"></i> Submit
+          </button>
+          <button ng-click="searchPhab(flattened['phatalityId'])"
+            tooltip-append-to-body="1"
+            tooltip="Search phabricator for this error">
+            <i class="fa fa-search"></i> Search
+          </button>
+        </td>
+      </tr>
+      <tr ng-repeat="field in fields" data-test-subj="tableDocViewRow-{{ field }}">
+        <td field-name="field"
+            field-type="mapping[field].type"
+            width="1%"
+            class="doc-viewer-field">
+        </td>
+        <td width="90%" class="doc-viewer-buttons" ng-if="filter">
+          <div class="doc-viewer-value" ng-bind-html="typeof(formatted[field]) === 'undefined' ? hit[field] : formatted[field] | trustAsHtml"></div>
+        </td>
+      </tr>
+    </tbody>
+  </table>
