@@ -53,8 +53,6 @@ ${messageBlock}
       doc['exception.previous.trace']);
   }
 
-  stack = stack.replace(versionPattern, '');
-
   const params = {
     "title": message,
     "description": desc,
@@ -79,24 +77,36 @@ function makePhabSearchUrl(phatalityId) {
   return `${searchUrl}?std:maniphest:error.id=${phatalityId}#R`;
 }
 
-function getField(doc, fieldName) {
-  var value =doc['exception.'+fieldName]
+/** gets the value of a named field from doc
+ * This looks for several variants of the named field, in order:
+ * 1. exception.{fieldName}
+ * 2. fatal_exception.{fieldName}
+ * 3. {fieldName}
+ * Finally returning a default value if none are found.
+ */
+function getField(doc, fieldName, defaultVal) {
+  defaultVal = defaultVal || '';
+  return (doc['exception.'+fieldName]
        || doc['fatal_exception.'+fieldName]
-       || doc[fieldName] || '';
+       || doc[fieldName]
+       || defaultVal) + "\n";
+}
 
-  return value.replace(versionPattern, '') + "\n";
+/** Removes the version prefix from paths */
+function trimVersion(value) {
+  return value.replace(versionPattern, '');
 }
 
 /** make a unique string that identifies an error and remains stable
  * across multiple WMF production versions of mediawiki & extensions. */
 function makePhatalityId(doc) {
-  var phatalityId = getField(doc, 'message')
-                   + getField(doc, 'class')
-                   + getField(doc, 'file');
-
+  var phatalityId = trimVersion(getField(doc, 'message'))
+                  + getField(doc, 'class')
+                  + trimVersion(getField(doc, 'file' ));
   return phatalityId;
 }
 
+/** This provides a custom doc view similar to the default table view */
 DocViewsRegistryProvider.register(function () {
     return {
       title: 'Phatality',
