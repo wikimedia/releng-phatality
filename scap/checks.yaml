@@ -2,4 +2,4 @@ checks:
   install_zip:
     type: command
     stage: promote
-    command: sudo -u kibana /usr/share/kibana/bin/kibana-plugin install /srv/deployment/releng/phatality/deploy/phatality-5.6.15.zip
+    command: sudo -u kibana /usr/share/kibana/bin/kibana-plugin install file:///srv/deployment/releng/phatality/deploy/phatality-5.6.15.zip
