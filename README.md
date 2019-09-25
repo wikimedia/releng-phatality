@@ -47,3 +47,30 @@ See the [kibana contributing guide](https://github.com/elastic/kibana/blob/maste
     Run the server tests using mocha
 
 For more information about any of these commands run `npm run ${task} -- --help`.
+
+## Deployment
+
+To deploy to wikimedia production:
+
+### On your workstation:
+
+Build the zip file
+  - `npm run build`
+
+Copy the zip file to deployment directory
+  - `cp build/*.zip deploy/`
+
+  Commit the zip for deployment
+  - `git add deploy/*; git commit -m 'updated zip for deployment'`
+
+ Push the change:
+
+  - `git push origin master`
+
+### On the deployment server
+
+ fetch the change and run `scap deploy`:
+
+- `cd /srv/deployment/releng/phatality; git pull`
+- `scap deploy`
+
