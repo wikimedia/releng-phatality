@@ -1,10 +1,10 @@
 {
   "name": "phatality",
-  "version": "5.6.14",
+  "version": "5.6.15",
   "description": "A kibana plugin to easily associate errors with Phabricator Tasks.",
   "main": "index.js",
   "kibana": {
-    "version": "5.6.14"
+    "version": "5.6.15"
   },
   "scripts": {
     "lint": "eslint",
