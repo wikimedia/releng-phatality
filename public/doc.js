@@ -100,7 +100,7 @@ function makePhatalityId(doc) {
 DocViewsRegistryProvider.register(function () {
     return {
       title: 'Phatality',
-      order: 1,
+      order: 30,
       directive: {
         template: docTemplate,
         scope: {
