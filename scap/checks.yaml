@@ -2,4 +2,4 @@ checks:
   install_zip:
     type: command
     stage: promote
-    command: sudo -u kibana /usr/share/kibana/bin/upgrade-phatality.sh
+    command: /usr/share/kibana/bin/upgrade-phatality.sh
