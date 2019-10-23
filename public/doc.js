@@ -27,16 +27,17 @@ function digestSha256(message) {
 function markupCodeBlock(header, content) {
   if (!content) {
     content = header;
-    header = "";
+    header = '';
   }
-  return "\n```"+ header + "\n" + content + "\n```";
+  return "\n```" + header + "\n" + content + "\n```";
 }
 
 /** Make the url for a pre-filled phabricator error report form */
 function makePhabUrl(doc) {
   var message = getField(doc, 'message');
   var messageBlock = markupCodeBlock('name=message', message);
-  var version = doc['mwversion']||'n/a';
+  var version = doc.mwversion || 'n/a';
+  var url = doc.server && doc.url ? `https://${doc.server}${doc.url}` : 'n/a';
   var desc = `=== Error  ===
 \`MediaWiki version:\`  	**\`${version}\`**
 ${messageBlock}
@@ -54,22 +55,22 @@ ${messageBlock}
   }
 
   const params = {
-    "title": message,
-    "description": desc,
-    "custom.error.stack": stack,
-    "custom.error.reqid": doc['reqId'],
-    "custom.error.url": doc['exception_url'] || 'n/a',
-  }
+    'title': message,
+    'description': desc,
+    'custom.error.stack': stack,
+    'custom.error.reqid': doc.reqId,
+    'custom.error.url': url,
+  };
 
   const query = new URLSearchParams();
 
-  if (doc['phatalityId']) {
-    query.append('custom.error.id', doc['phatalityId']);
+  if (doc.phatalityId) {
+    query.append('custom.error.id', doc.phatalityId);
   }
   for (const [key, val] of Object.entries(params)) {
     query.append(key, val);
   }
-  return `${formUrl}?${query.toString()}`
+  return `${formUrl}?${query.toString()}`;
 }
 
 /** Make the url to search phabricator for a given phatalityId */
@@ -128,14 +129,14 @@ DocViewsRegistryProvider.register(function () {
           $scope.formatted = $scope.indexPattern.formatHit($scope.hit);
           $scope.fields = _.keys($scope.flattened).sort();
           $scope.fields.unshift('phatalityId');
-          $scope.mapping['phatalityId'] = $scope.mapping['message'];
+          $scope.mapping.phatalityId = $scope.mapping.message;
 
           var phatalityId = makePhatalityId($scope.flattened);
           // Make a hash of the phatalityId instead of using the raw string:
           digestSha256(phatalityId).then(digestValue => {
             phatalityId = hexString(digestValue);
-            $scope.formatted['phatalityId'] =
-             $scope.flattened['phatalityId'] = phatalityId;
+            $scope.formatted.phatalityId =
+             $scope.flattened.phatalityId = phatalityId;
           });
 
           $scope.submitToPhab = function(fields) {
