@@ -24,48 +24,39 @@ prefix is different but the file name, function name, etc remain unchanged.
 
 ## development
 
-See the [kibana contributing guide](https://github.com/elastic/kibana/blob/master/CONTRIBUTING.md) for instructions setting up your development environment. Once you have completed that, use the following npm tasks.
+See the [kibana external plugin development](https://www.elastic.co/guide/en/kibana/current/external-plugin-development.html) page for additional information.
 
-  - `npm start`
+### Quickstart
+Ensure you have yarn and the required node version installed.  Node version can be found in the kibana repo in the `.node_version` file.
 
-    Start kibana and have it include this plugin
+```bash
+  export $KIBANA_VERSION='v7.10.0'
+  git clone https://github.com/elastic/kibana.git
+  cd kibana
+  git checkout tags/$KIBANA_VERSION"
+  yarn kbn bootstrap
+  cd plugins
+  git clone "https://gerrit.wikimedia.org/r/releng/phatality" && (cd "phatality" && mkdir -p .git/hooks && curl -Lo `git rev-parse --git-dir`/hooks/commit-msg https://gerrit.wikimedia.org/r/tools/hooks/commit-msg; chmod +x `git rev-parse --git-dir`/hooks/commit-msg)
+```
 
-  - `npm start -- --config kibana.yml`
-
-    You can pass any argument that you would normally send to `bin/kibana` by putting them after `--` when running `npm start`
-
-  - `npm run build`
-
-    Build a distributable archive in build/ subdirectory
-
-  - `npm run test:browser`
-
-    Run the browser tests in a real web browser
-
-  - `npm run test:server`
-
-    Run the server tests using mocha
-
-For more information about any of these commands run `npm run ${task} -- --help`.
+Now we can start the development server.  Make sure you have a local instance of ElasticSearch running.
+```
+  cd kibana
+  yarn start --oss
+```
 
 ## Deployment
 
 To deploy to wikimedia production:
 
 ### On your workstation:
-
-Build the zip file
-  - `npm run build`
-
-Copy the zip file to deployment directory
-  - `cp build/*.zip deploy/`
-
-  Commit the zip for deployment
-  - `git add deploy/*; git commit -m 'updated zip for deployment'`
-
- Push the change:
-
-  - `git push origin master`
+```bash
+  cd kibana/plugins/phatality
+  yarn build --kibana-version 7.10.0
+  cp build/*.zip deploy/
+  git add deploy/*; git commit -m 'updated zip for deployment'
+  git push origin master
+```
 
 ### On the deployment server
 

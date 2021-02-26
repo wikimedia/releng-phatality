@@ -1,25 +1,10 @@
 {
   "name": "phatality",
-  "version": "5.6.15",
-  "description": "A kibana plugin to easily associate errors with Phabricator Tasks.",
-  "main": "index.js",
-  "kibana": {
-    "version": "5.6.15"
-  },
+  "version": "7.10.0",
+  "private": true,
   "scripts": {
-    "lint": "eslint",
-    "start": "plugin-helpers start",
-    "test:server": "plugin-helpers test:server",
-    "test:browser": "plugin-helpers test:browser",
-    "build": "plugin-helpers build",
-    "postinstall": "plugin-helpers postinstall"
-  },
-  "devDependencies": {
-    "@elastic/eslint-config-kibana": "0.0.2",
-    "@elastic/plugin-helpers": "^6.0.0",
-    "babel-eslint": "4.1.8",
-    "chai": "^3.5.0",
-    "eslint": "1.10.3",
-    "eslint-plugin-mocha": "1.1.0"
+    "build": "yarn plugin-helpers build",
+    "plugin-helpers": "node ../../scripts/plugin_helpers",
+    "kbn": "node ../../scripts/kbn"
   }
 }

@@ -1,0 +1,9 @@
+{
+  "id": "phatality",
+  "version": "7.10.0",
+  "kibanaVersion": "kibana",
+  "server": false,
+  "ui": true,
+  "requiredPlugins": ["discover"],
+  "optionalPlugins": []
+}
