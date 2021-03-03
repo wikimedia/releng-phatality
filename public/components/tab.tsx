@@ -22,7 +22,7 @@ export class PhatalityTab extends React.Component<DocViewRenderProps, {}> {
       phatalityIdSrc: doc.normalized_message || doc.message,
       title: makeTitle(doc),
       desc: makePhabDesc(doc),
-      url: doc.server && doc.url ? `https://${doc.server}${doc.url}` : 'n/a',
+      url: makeAnonymousUrl(doc),
       // Computed later
       phatalityId: '',
       phabSearchUrl: '',

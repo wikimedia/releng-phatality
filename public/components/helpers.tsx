@@ -53,6 +53,38 @@ export function makeTitle(doc) {
   }
 }
 
+export function makeAnonymousUrl(server, urlPath) {
+  if (!server || !urlPath) {
+    return '';
+  }
+  const url = `https://${server}${urlPath}`;
+  try {
+    const parsed = new URL(url);
+    parsed.searchParams.forEach((value, param) => {
+      // Replace values that may be personal or personally identifying,
+      // either by themselves or through correlation (differential privacy).
+      //
+      // Exception is made for query params that are system-defined with
+      // finite possible values that describe the entry point or route
+      // inside the application and are thus fairly popular/common.
+      //
+      // - action: Accepted by index.php and api.php.
+      //           Longest known value is "centralnoticecdncacheupdatebanner".
+      //
+      // Sanity check the value.
+      if (!['action'].includes(param) || !/^[a-z]{1,35}$/.test(value)) {
+        parsed.searchParams.set(param, '*');
+      }
+    });
+    return parsed.toString();
+  } catch (e) {
+    // Ignore if it contains invalid encoding.
+    // If relevant to the task, someone might add an anonymous form of it manually,
+    // or developer can look it up in Logstash.
+    return '';
+  }
+}
+
 function makeLogstashTimedQueryUrl(key, value, timestamp) {
   // Give the query a 1-2 day range, instead of all of `from:now-90d,to:now` (which would be slow).
   // It would make sense to reduce this to just a 1 hour range, but that's not actually much faster,
@@ -86,13 +118,25 @@ function makeLogstashRecentQueryUrl(key, value) {
     + `&_a=(query:(query_string:(query:${encodeURI(`'${key}:"${value}"'`)})))`
 }
 
+function sanitizeTrace(trace) {
+  if (trace && /['"]/.test(trace)) {
+    // Redacted stack traces from MediaWiki only contain file paths, methods, and arg types.
+    // If a quote character is found, it most likely means redaction is broken,
+    // or that the fatal was reported by PHP outside of MWExceptionHandler's ability
+    // to intercept and redact it.
+    // https://phabricator.wikimedia.org/T234014
+    return '(REDACTED)';
+  }
+  return trace;
+}
+
 /** Make the url for a pre-filled phabricator error report form */
 export function makePhabDesc(doc) {
   let messageBlock = markupCodeBlock('name=normalized_message', doc.normalized_message);
 
-  let stackBlock = markupCodeBlock('name=exception.trace,lines=10', doc['exception.trace']);
+  let stackBlock = markupCodeBlock('name=exception.trace,lines=10', sanitizeTrace(doc['exception.trace']));
   if (doc['exception.previous.trace']) {
-    stackBlock += markupCodeBlock('name=exception.previous.trace,lines=10', doc['exception.previous.trace']);
+    stackBlock += markupCodeBlock('name=exception.previous.trace,lines=10', sanitizeTrace(doc['exception.previous.trace']));
   }
 
   let desc = `==== Error  ====
@@ -120,7 +164,6 @@ export function makePhabSubmitUrl(params: PhabUrlParams) {
   let desc = makePhabDesc(params);
 
   const query = new URLSearchParams();
-
   query.append('custom.error.id', params.id);
   query.append('title', params.title);
   query.append('description', desc);
