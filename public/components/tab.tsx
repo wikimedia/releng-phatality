@@ -2,15 +2,16 @@ import React from 'react';
 import { DocViewRenderProps } from '../types';
 import { EuiButton } from "@elastic/eui";
 import {
-  getField,
-  makePhatalityId,
+  makePhatalityIdSrc,
   digestSha256,
   hexString,
+  makePhabDesc,
   makePhabSearchUrl,
-  makePhabUrl,
+  makePhabSubmitUrl,
+  makeTitle,
   openNewTab,
 } from './helpers';
-import { PhatalityRow } from './row';
+import { PhatalityLine, PhatalityArea } from './row';
 
 export class PhatalityTab extends React.Component<DocViewRenderProps, {}> {
 
@@ -18,16 +19,14 @@ export class PhatalityTab extends React.Component<DocViewRenderProps, {}> {
     super(props);
     let doc = props.indexPattern.flattenHit(props.hit);
     this.state = {
-      phatalityIdSrc: makePhatalityId(doc),
+      phatalityIdSrc: doc.normalized_message || doc.message,
+      title: makeTitle(doc),
+      desc: makePhabDesc(doc),
+      url: doc.server && doc.url ? `https://${doc.server}${doc.url}` : 'n/a',
+      // Computed later
       phatalityId: '',
       phabSearchUrl: '',
-      phabUrl: '',
-      message: getField(doc, 'message', 'n/a'),
-      version: doc.mwversion || 'n/a',
-      url: doc.server && doc.url ? `https://${doc.server}${doc.url}` : 'n/a',
-      exception_trace: doc['exception.trace'] || 'n/a',
-      previous_trace: doc['exception.previous.trace'],
-      requestId: doc.reqId || 'n/a',
+      phabUrl: ''
     };
   }
 
@@ -39,14 +38,11 @@ export class PhatalityTab extends React.Component<DocViewRenderProps, {}> {
       this.setState({
         phatalityId: digestString,
         phabSearchUrl: makePhabSearchUrl(digestString),
-        phabUrl: makePhabUrl({
+        phabUrl: makePhabSubmitUrl({
           id: digestString,
-          exception_trace: this.state.exception_trace,
-          message: this.state.message,
-          previous_trace: this.state.previous_trace,
-          requestId: this.state.requestId,
-          url: this.state.url,
-          version: this.state.version
+          title: this.state.title,
+          desc: this.state.desc,
+          url: this.state.url
         }),
       });
     });
@@ -57,7 +53,7 @@ export class PhatalityTab extends React.Component<DocViewRenderProps, {}> {
       <table className="table table-condensed kbnDocViewerTable">
         <tbody>
         <tr>
-          <td>Phatality actions:</td>
+          <td>Phabricator actions:</td>
           <td>
             <EuiButton type="primary" size="s" onClick={() => {openNewTab(this.state.phabUrl)}}>
               <span className="fa fa-plus"></span> Submit
@@ -67,12 +63,10 @@ export class PhatalityTab extends React.Component<DocViewRenderProps, {}> {
             </EuiButton>
           </td>
         </tr>
-        <PhatalityRow field='phatalityId' value={this.state.phatalityId}/>
-        <PhatalityRow field='message' value={this.state.message}/>
-        <PhatalityRow field='version' value={this.state.version}/>
-        <PhatalityRow field='url' value={this.state.url}/>
-        <PhatalityRow field='stack' value={this.state.stack}/>
-        <PhatalityRow field='requestId' value={this.state.requestId}/>
+        <PhatalityLine field='phatalityId' value={this.state.phatalityId}/>
+        <PhatalityLine field='title' value={this.state.title}/>
+        <PhatalityArea field='desc' value={this.state.desc}/>
+        <PhatalityLine field='url' value={this.state.url}/>
         </tbody>
       </table>
     );

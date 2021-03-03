@@ -1,4 +1,3 @@
-const versionPattern = /\/srv\/mediawiki\/php-(\d\.\d+\.\d+-wmf\.\d+)/g;
 const searchUrl = 'https://phabricator.wikimedia.org/maniphest/query/advanced/';
 const formUrl = 'https://phabricator.wikimedia.org/maniphest/task/edit/form/46/';
 
@@ -29,38 +28,102 @@ export function markupCodeBlock(header, content) {
 
 interface PhabUrlParams {
   id: string,
-  message: string,
-  version: string,
+  title: string,
+  desc: string,
   url: string,
-  exception_trace: string,
-  previous_trace: string,
-  requestId: string,
+}
+
+export function makeTitle(doc) {
+  // When a runtime error is logged by PHP, this is turned into an ErrorException
+  // temporarily to obtain a trace. It is not actually an exception that is thrown
+  // or left uncaught, though, so report only the message that PHP developers are
+  // familiar with from their server logs or IDE (ignore the fake class).
+  if (doc['exception.class'] === 'ErrorException') {
+    return doc['exception.message'];
+  }
+
+  // MediaWiki does not (yet) override normalized_message for exceptions to omit
+  // the reqId/url placeholders (which we want to exclude from the task title).
+  // For now, immitate what MediaWiki's MWExceptionHandler.php#getLogNormalMessage does
+  // but without those placeholders in front.
+  if (doc['exception.class']) {
+    return `${doc['exception.class']}: ${doc['exception.message']}`;
+  } else {
+    return doc.normalized_message || doc.message;
+  }
+}
+
+function makeLogstashTimedQueryUrl(key, value, timestamp) {
+  // Give the query a 1-2 day range, instead of all of `from:now-90d,to:now` (which would be slow).
+  // It would make sense to reduce this to just a 1 hour range, but that's not actually much faster,
+  // and it's problem because, despite ISO dates having a trailing Z both in doc.timestamp, and
+  // in Date#toISOString output, Kibana still manages to get timezone-confused, which means
+  // people outside UTC wouldn't find anything.
+  let from = timestamp ? new Date(timestamp) : new Date();
+  from.setDate(from.getDate() - 1);
+  from = from.toISOString();
+  let to = new Date(timestamp);
+  to.setDate(to.getDate() + 1);
+  to.setTime(Math.min(to.getTime(), Date.now()));
+  to = to.toISOString();
+
+  // Use the main "mediawiki" dashboard
+  return 'https://logstash.wikimedia.org/app/dashboards#/view/AXFV7JE83bOlOASGccsT'
+    // Kibana uses the incomprensible Rison format for this purpose.
+    // It is important that the values use single quotes, not double quotes.
+    // https://www.elastic.co/guide/en/kibana/7.12/url_templating-language.html
+    // https://github.com/w33ble/rison-node
+    + `?_g=(time:(from:'${from}',to:'${to}'))`
+    // Use double quotes on the inner portion (that's the Lucene query)
+    + `&_a=(query:(query_string:(query:${encodeURI(`'${key}:"${value}"'`)})))`
+}
+
+/** Make the url for a Last 30 days query */
+function makeLogstashRecentQueryUrl(key, value) {
+  return 'https://logstash.wikimedia.org/app/dashboards#/view/AXFV7JE83bOlOASGccsT'
+    + `?_g=(time:(from:now-30d,to:now))`
+    // Use double quotes on the inner portion (that's the Lucene query)
+    + `&_a=(query:(query_string:(query:${encodeURI(`'${key}:"${value}"'`)})))`
 }
 
 /** Make the url for a pre-filled phabricator error report form */
-export function makePhabUrl(params: PhabUrlParams) {
-  let messageBlock = markupCodeBlock('name=message', params.message);
-  let desc = `=== Error  ===
-\`MediaWiki version:\`  	**\`${params.version}\`**
-${messageBlock}
+export function makePhabDesc(doc) {
+  let messageBlock = markupCodeBlock('name=normalized_message', doc.normalized_message);
 
-=== Impact ===
-
-=== Notes ===`;
-
-  let stack = markupCodeBlock('name=exception.trace,lines=10', params.exception_trace);
-
-  if (params.previous_trace !== undefined) {
-    stack += markupCodeBlock('name=exception.previous.trace,lines=10', params.previous_trace);
+  let stackBlock = markupCodeBlock('name=exception.trace,lines=10', doc['exception.trace']);
+  if (doc['exception.previous.trace']) {
+    stackBlock += markupCodeBlock('name=exception.previous.trace,lines=10', doc['exception.previous.trace']);
   }
+
+  let desc = `==== Error  ====
+
+* mwversion: \`${doc.mwversion}\`
+* reqId: \`${doc.reqId}\`
+* [[ ${makeLogstashTimedQueryUrl('reqId', doc.reqId, doc.timestamp)} | Find reqId in Logstash ]]
+* [[ ${makeLogstashRecentQueryUrl('normalized_message', doc.normalized_message)} | Find normalized_message in Logstash ]]
+
+${messageBlock}
+${stackBlock}
+
+==== Impact ====
+
+
+==== Notes ====
+
+`;
+
+  return desc;
+}
+
+/** Make the url for a pre-filled Phabricator error report form */
+export function makePhabSubmitUrl(params: PhabUrlParams) {
+  let desc = makePhabDesc(params);
 
   const query = new URLSearchParams();
 
   query.append('custom.error.id', params.id);
-  query.append('title', params.message);
+  query.append('title', params.title);
   query.append('description', desc);
-  query.append('custom.error.stack', stack);
-  query.append('custom.error.reqId', params.requestId);
   query.append('custom.error.url', params.url);
 
   return `${formUrl}?${query.toString()}`;
@@ -69,32 +132,6 @@ ${messageBlock}
 /** Make the url to search phabricator for a given phatalityId */
 export function makePhabSearchUrl(phatalityId) {
   return `${searchUrl}?std:maniphest:error.id=${phatalityId}#R`;
-}
-
-/** gets the value of a named field from doc
- * This looks for several variants of the named field, in order:
- * 1. exception.{fieldName}
- * 2. {fieldName}
- * Finally returning a default value if none are found.
- */
-export function getField(doc, fieldName, defaultVal) {
-  defaultVal = defaultVal || '';
-  return (doc['exception.'+fieldName]
-    || doc[fieldName]
-    || defaultVal) + "\n";
-}
-
-/** Removes the version prefix from paths */
-export function trimVersion(value) {
-  return value.replace(versionPattern, '');
-}
-
-/** make a unique string that identifies an error and remains stable
- * across multiple WMF production versions of mediawiki & extensions. */
-export function makePhatalityId(doc) {
-  return trimVersion(getField(doc, 'message'))
-    + getField(doc, 'class')
-    + trimVersion(getField(doc, 'file' ));
 }
 
 export function openNewTab(url) {
