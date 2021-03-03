@@ -74,14 +74,12 @@ export function makePhabSearchUrl(phatalityId) {
 /** gets the value of a named field from doc
  * This looks for several variants of the named field, in order:
  * 1. exception.{fieldName}
- * 2. fatal_exception.{fieldName}
- * 3. {fieldName}
+ * 2. {fieldName}
  * Finally returning a default value if none are found.
  */
 export function getField(doc, fieldName, defaultVal) {
   defaultVal = defaultVal || '';
   return (doc['exception.'+fieldName]
-    || doc['fatal_exception.'+fieldName]
     || doc[fieldName]
     || defaultVal) + "\n";
 }

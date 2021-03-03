@@ -25,7 +25,7 @@ export class PhatalityTab extends React.Component<DocViewRenderProps, {}> {
       message: getField(doc, 'message', 'n/a'),
       version: doc.mwversion || 'n/a',
       url: doc.server && doc.url ? `https://${doc.server}${doc.url}` : 'n/a',
-      exception_trace: doc['exception.trace'] || doc['fatal_exception.trace'] || 'n/a',
+      exception_trace: doc['exception.trace'] || 'n/a',
       previous_trace: doc['exception.previous.trace'],
       requestId: doc.reqId || 'n/a',
     };
