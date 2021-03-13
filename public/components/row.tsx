@@ -12,7 +12,7 @@ export function PhatalityLine ({
   return (
     <tr>
       <td>{field}</td>
-      <td><textarea readOnly rows="1" className="euiTextArea" onClick={(e) => {e.target.select()}} value={value}></textarea></td>
+      <td><textarea readOnly rows={1} className="euiTextArea" onClick={(e) => {e.target.select()}} value={value}></textarea></td>
     </tr>
   );
 }
@@ -24,7 +24,7 @@ export function PhatalityArea ({
   return (
     <tr>
       <td>{field}</td>
-      <td><textarea readOnly rows="5" className="euiTextArea" onClick={(e) => {e.target.select()}} value={value}></textarea></td>
+      <td><textarea readOnly rows={5} className="euiTextArea" onClick={(e) => {e.target.select()}} value={value}></textarea></td>
     </tr>
   );
 }
