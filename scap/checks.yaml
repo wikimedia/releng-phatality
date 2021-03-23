@@ -7,5 +7,5 @@ checks:
   install_zip:
     type: command
     stage: promote
-    command: /usr/bin/sudo -u kibana /usr/share/kibana/bin/kibana-plugin install file:///srv/deployment/releng/phatality/deploy/phatality-5.6.15.zip
+    command: /usr/bin/sudo -u kibana /usr/share/kibana/bin/kibana-plugin install file:///srv/deployment/releng/phatality/deploy/phatality-7.10.0.zip
     timeout: 240
