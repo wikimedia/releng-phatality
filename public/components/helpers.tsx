@@ -25,7 +25,6 @@ export function markupCodeBlock(header:string, content:string) {
   }
   return "\n```" + header + "\n" + content + "\n```";
 }
-
 interface PhabUrlParams {
   id: string,
   title: string,
@@ -33,7 +32,7 @@ interface PhabUrlParams {
   url: string,
 }
 
-export function makeTitle(doc:object) {
+export function makeTitle(doc:Record<string, any>) {
   // When a runtime error is logged by PHP, this is turned into an ErrorException
   // temporarily to obtain a trace. It is not actually an exception that is thrown
   // or left uncaught, though, so report only the message that PHP developers are
@@ -85,7 +84,7 @@ export function makeAnonymousUrl(server:string|undefined, urlPath:string|undefin
   }
 }
 
-function makeLogstashTimedQueryUrl(key:string, value:string, timestamp:number) {
+function makeLogstashTimedQueryUrl(key:string, value:string, timestamp:string|undefined) {
   // Give the query a 1-2 day range, instead of all of `from:now-90d,to:now` (which would be slow).
   // It would make sense to reduce this to just a 1 hour range, but that's not actually much faster,
   // and it's problem because, despite ISO dates having a trailing Z both in doc.timestamp, and
@@ -94,7 +93,7 @@ function makeLogstashTimedQueryUrl(key:string, value:string, timestamp:number) {
   let from = timestamp ? new Date(timestamp) : new Date();
   from.setDate(from.getDate() - 1);
   let fromstr = from.toISOString();
-  let to = new Date(timestamp);
+  let to = timestamp ? new Date(timestamp) : new Date();
   to.setDate(to.getDate() + 1);
   to.setTime(Math.min(to.getTime(), Date.now()));
   let tostr = to.toISOString();
@@ -131,7 +130,7 @@ function sanitizeTrace(trace:string) {
 }
 
 /** Make the url for a pre-filled phabricator error report form */
-export function makePhabDesc(doc) {
+export function makePhabDesc(doc:Record<string, any>) {
   let messageBlock = markupCodeBlock('name=normalized_message', doc.normalized_message);
 
   let stackBlock = markupCodeBlock('name=exception.trace,lines=10', sanitizeTrace(doc['exception.trace']));
@@ -161,12 +160,10 @@ ${stackBlock}
 
 /** Make the url for a pre-filled Phabricator error report form */
 export function makePhabSubmitUrl(params: PhabUrlParams) {
-  let desc = makePhabDesc(params);
-
   const query = new URLSearchParams();
   query.append('custom.error.id', params.id);
   query.append('title', params.title);
-  query.append('description', desc);
+  query.append('description', params.desc);
   query.append('custom.error.url', params.url);
 
   return `${formUrl}?${query.toString()}`;

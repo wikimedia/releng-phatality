@@ -2,7 +2,7 @@ import React from 'react';
 import { DocViewRenderProps } from '../types';
 import { EuiButton } from "@elastic/eui";
 import {
-  makePhatalityIdSrc,
+  makeAnonymousUrl,
   digestSha256,
   hexString,
   makePhabDesc,
@@ -13,16 +13,28 @@ import {
 } from './helpers';
 import { PhatalityLine, PhatalityArea } from './row';
 
-export class PhatalityTab extends React.Component<DocViewRenderProps, {}> {
+interface PhatalityState {
+  phatalityIdSrc: string,
+  title: string,
+  desc: string,
+  url: string,
+  phatalityId: string,
+  phabSearchUrl: string,
+  phabUrl: string,
+}
 
-  constructor(props) {
+export class PhatalityTab extends React.Component<DocViewRenderProps, {}> {
+  state: PhatalityState;
+
+  constructor(props:DocViewRenderProps) {
     super(props);
     let doc = props.indexPattern.flattenHit(props.hit);
+
     this.state = {
       phatalityIdSrc: doc.normalized_message || doc.message,
       title: makeTitle(doc),
       desc: makePhabDesc(doc),
-      url: makeAnonymousUrl(doc),
+      url: makeAnonymousUrl(doc.server, doc.url),
       // Computed later
       phatalityId: '',
       phabSearchUrl: '',
@@ -42,7 +54,7 @@ export class PhatalityTab extends React.Component<DocViewRenderProps, {}> {
           id: digestString,
           title: this.state.title,
           desc: this.state.desc,
-          url: this.state.url
+          url: this.state.url,
         }),
       });
     });
