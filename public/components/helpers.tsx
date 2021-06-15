@@ -126,16 +126,19 @@ function sanitizeTrace(trace:string) {
     // https://phabricator.wikimedia.org/T234014
     return '(REDACTED)';
   }
+  if (trace.length > 1600) {
+    return trace.substring(0, 1600);
+  }
   return trace;
 }
 
 /** Make the url for a pre-filled phabricator error report form */
 export function makePhabDesc(doc:Record<string, any>) {
-  let messageBlock = markupCodeBlock('name=normalized_message', doc.normalized_message);
+  let messageBlock = markupCodeBlock('name=message', doc.normalized_message);
 
-  let stackBlock = markupCodeBlock('name=exception.trace,lines=10', sanitizeTrace(doc['exception.trace']));
-  if (doc['exception.previous.trace']) {
-    stackBlock += markupCodeBlock('name=exception.previous.trace,lines=10', sanitizeTrace(doc['exception.previous.trace']));
+  let stackBlock = markupCodeBlock('name=trace,lines=10', sanitizeTrace(doc['exception.trace']));
+  if (doc['exception.previous.trace'] && stackBlock.length < 1600) {
+    stackBlock += markupCodeBlock('name=previous.trace,lines=10', sanitizeTrace(doc['exception.previous.trace']));
   }
 
   let desc = `==== Error  ====
@@ -143,7 +146,7 @@ export function makePhabDesc(doc:Record<string, any>) {
 * mwversion: \`${doc.mwversion}\`
 * reqId: \`${doc.reqId}\`
 * [[ ${makeLogstashTimedQueryUrl('reqId', doc.reqId, doc.timestamp)} | Find reqId in Logstash ]]
-* [[ ${makeLogstashRecentQueryUrl('normalized_message', doc.normalized_message)} | Find normalized_message in Logstash ]]
+* [[ ${makeLogstashRecentQueryUrl('normalized_message', doc.normalized_message)} | Find message in Logstash ]]
 
 ${messageBlock}
 ${stackBlock}
