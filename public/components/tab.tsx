@@ -20,6 +20,7 @@ interface PhatalityState {
   url: string,
   phatalityId: string,
   phabSearchUrl: string,
+  phabShortUrl: string,
   phabUrl: string,
 }
 
@@ -38,6 +39,7 @@ export class PhatalityTab extends React.Component<DocViewRenderProps, {}> {
       // Computed later
       phatalityId: '',
       phabSearchUrl: '',
+      phabShortUrl: '',
       phabUrl: ''
     };
   }
@@ -56,6 +58,12 @@ export class PhatalityTab extends React.Component<DocViewRenderProps, {}> {
           desc: this.state.desc,
           url: this.state.url,
         }),
+        phabShortUrl: makePhabSubmitUrl({
+          id: digestString,
+          title: this.state.title,
+          desc: '',
+          url: this.state.url,
+        }),
       });
     });
   }
@@ -67,12 +75,21 @@ export class PhatalityTab extends React.Component<DocViewRenderProps, {}> {
         <tr>
           <td>Phabricator actions:</td>
           <td>
-            <EuiButton type="primary" size="s" onClick={() => {openNewTab(this.state.phabUrl)}}>
+            <EuiButton type="primary" size="s" onClick={() => {
+              openNewTab(this.state.phabUrl.length > 1600
+               ? this.state.phabShortUrl
+               : this.state.phabUrl)
+            }}>
               <span className="fa fa-plus"></span> Submit
             </EuiButton>
             <EuiButton type="primary" size="s" onClick={() => {openNewTab(this.state.phabSearchUrl)}}>
               <span className="fa fa-search"></span> Search
             </EuiButton>
+            { this.state.phabUrl.length > 1600 &&
+              <div>
+                Warning: The description is too long to submit by URL. Please copy it manually.
+              </div>
+            }
           </td>
         </tr>
         <PhatalityLine field='phatalityId' value={this.state.phatalityId}/>
