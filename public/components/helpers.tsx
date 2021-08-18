@@ -109,14 +109,6 @@ function makeLogstashTimedQueryUrl(key:string, value:string, timestamp:string|un
     + `&_a=(query:(query_string:(query:${encodeURI(`'${key}:"${value}"'`)})))`
 }
 
-/** Make the url for a Last 30 days query */
-function makeLogstashRecentQueryUrl(key:string, value:string) {
-  return 'https://logstash.wikimedia.org/app/dashboards#/view/AXFV7JE83bOlOASGccsT'
-    + `?_g=(time:(from:now-30d,to:now))`
-    // Use double quotes on the inner portion (that's the Lucene query)
-    + `&_a=(query:(query_string:(query:${encodeURI(`'${key}:"${value}"'`)})))`
-}
-
 function sanitizeTrace(trace:string) {
   if (trace && /['"]/.test(trace)) {
     // Redacted stack traces from MediaWiki only contain file paths, methods, and arg types.
@@ -143,7 +135,6 @@ export function makePhabDesc(doc:Record<string, any>) {
 * mwversion: \`${doc.mwversion}\`
 * reqId: \`${doc.reqId}\`
 * [[ ${makeLogstashTimedQueryUrl('reqId', doc.reqId, doc.timestamp)} | Find reqId in Logstash ]]
-* [[ ${makeLogstashRecentQueryUrl('normalized_message', doc.normalized_message)} | Find normalized_message in Logstash ]]
 
 ${messageBlock}
 ${stackBlock}
