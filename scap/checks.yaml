@@ -2,10 +2,10 @@ checks:
   install_zip:
     type: command
     stage: promote
-    command: /usr/share/kibana/bin/upgrade-phatality.sh
+    command: /usr/share/opensearch-dashboards/bin/upgrade-phatality.sh
     timeout: 100
-  restart_kibana:
+  restart_dashboards:
     type: command
     stage: promote
-    command: sudo /usr/bin/systemctl restart kibana
+    command: sudo /usr/bin/systemctl restart opensearch-dashboards
     timeout: 220

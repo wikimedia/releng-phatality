@@ -1,7 +1,7 @@
 {
   "id": "phatality",
-  "version": "7.10.0",
-  "kibanaVersion": "kibana",
+  "version": "1.0.0",
+  "opensearchDashboardsVersion": "opensearchDashboards",
   "server": false,
   "ui": true,
   "requiredPlugins": ["discover"],

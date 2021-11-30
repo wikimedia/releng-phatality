@@ -88,7 +88,7 @@ function makeLogstashTimedQueryUrl(key:string, value:string, timestamp:string|un
   // Give the query a 1-2 day range, instead of all of `from:now-90d,to:now` (which would be slow).
   // It would make sense to reduce this to just a 1 hour range, but that's not actually much faster,
   // and it's problem because, despite ISO dates having a trailing Z both in doc.timestamp, and
-  // in Date#toISOString output, Kibana still manages to get timezone-confused, which means
+  // in Date#toISOString output, OpenSearch Dashboards still manages to get timezone-confused, which means
   // people outside UTC wouldn't find anything.
   let from = timestamp ? new Date(timestamp) : new Date();
   from.setDate(from.getDate() - 1);
@@ -100,7 +100,7 @@ function makeLogstashTimedQueryUrl(key:string, value:string, timestamp:string|un
 
   // Use the main "mediawiki" dashboard
   return 'https://logstash.wikimedia.org/app/dashboards#/view/AXFV7JE83bOlOASGccsT'
-    // Kibana uses the incomprensible Rison format for this purpose.
+    // OpenSearch Dashboards uses the incomprehensible Rison format for this purpose.
     // It is important that the values use single quotes, not double quotes.
     // https://www.elastic.co/guide/en/kibana/7.12/url_templating-language.html
     // https://github.com/w33ble/rison-node

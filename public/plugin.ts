@@ -1,4 +1,4 @@
-import { CoreSetup, CoreStart, Plugin } from 'kibana/public';
+import { CoreSetup, CoreStart, Plugin } from 'opensearch_dashboards/public';
 import { PhatalityPluginSetup, PhatalityPluginStart } from './types';
 import { PhatalityTab } from './components/tab';
 

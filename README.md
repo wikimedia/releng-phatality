@@ -1,6 +1,6 @@
 # phatality
 
-> A kibana plugin to easily associate errors with Phabricator Tasks.
+> An OpenSearch Dashboards plugin to easily associate errors with Phabricator Tasks.
 
 This adds a custom document renderer which includes two new buttons:
 
@@ -24,24 +24,24 @@ prefix is different but the file name, function name, etc remain unchanged.
 
 ## development
 
-See the [kibana external plugin development](https://www.elastic.co/guide/en/kibana/current/external-plugin-development.html) page for additional information.
+See the [kibana external plugin development](https://www.elastic.co/guide/en/kibana/current/external-plugin-development.html) page for additional information.  (OpenSearch docs TBD.)
 
 ### Quickstart
-Ensure you have yarn and the required node version installed.  Node version can be found in the kibana repo in the `.node_version` file.
+Ensure you have yarn and the required node version installed.  Node version can be found in the OpenSearch Dashboards repo in the `.node-version` file.
 
 ```bash
-  export $KIBANA_VERSION='v7.10.0'
-  git clone https://github.com/elastic/kibana.git
-  cd kibana
-  git checkout tags/$KIBANA_VERSION"
-  yarn kbn bootstrap
+  export $DASHBOARDS_VERSION='1.0.0'
+  git clone https://github.com/opensearch-project/OpenSearch-Dashboards.git
+  cd OpenSearch-Dashboards
+  git checkout tags/$DASHBOARDS_VERSION"
+  yarn osd bootstrap
   cd plugins
   git clone "https://gerrit.wikimedia.org/r/releng/phatality" && (cd "phatality" && mkdir -p .git/hooks && curl -Lo `git rev-parse --git-dir`/hooks/commit-msg https://gerrit.wikimedia.org/r/tools/hooks/commit-msg; chmod +x `git rev-parse --git-dir`/hooks/commit-msg)
 ```
 
 Now we can start the development server.  Make sure you have a local instance of ElasticSearch running.
 ```
-  cd kibana
+  cd OpenSearch-Dashboards
   yarn start --oss
 ```
 
@@ -51,8 +51,8 @@ To deploy to wikimedia production:
 
 ### On your workstation:
 ```bash
-  cd kibana/plugins/phatality
-  yarn build --kibana-version 7.10.0
+  cd OpenSearch-Dashboards/plugins/phatality
+  yarn build --opensearch-dashboards-version 1.0.0
   cp build/*.zip deploy/
   git add deploy/*; git commit -m 'updated zip for deployment'
   git push origin master
