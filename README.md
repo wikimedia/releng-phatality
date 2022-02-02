@@ -30,7 +30,7 @@ See the [kibana external plugin development](https://www.elastic.co/guide/en/kib
 Ensure you have yarn and the required node version installed.  Node version can be found in the OpenSearch Dashboards repo in the `.node-version` file.
 
 ```bash
-  export $DASHBOARDS_VERSION='1.0.0'
+  export $DASHBOARDS_VERSION='1.2.0'
   git clone https://github.com/opensearch-project/OpenSearch-Dashboards.git
   cd OpenSearch-Dashboards
   git checkout tags/$DASHBOARDS_VERSION"
@@ -52,7 +52,7 @@ To deploy to wikimedia production:
 ### On your workstation:
 ```bash
   cd OpenSearch-Dashboards/plugins/phatality
-  yarn build --opensearch-dashboards-version 1.0.0
+  yarn build --opensearch-dashboards-version 1.2.0
   cp build/*.zip deploy/
   git add deploy/*; git commit -m 'updated zip for deployment'
   git push origin master
