@@ -1,3 +1,5 @@
 /build
 /target
 /.idea
+/node_modules
+/package-lock.json

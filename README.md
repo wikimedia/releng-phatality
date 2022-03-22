@@ -22,18 +22,35 @@ prefix is different but the file name, function name, etc remain unchanged.
 
 ---
 
-## development
+## Development
 
 See the [kibana external plugin development](https://www.elastic.co/guide/en/kibana/current/external-plugin-development.html) page for additional information.  (OpenSearch docs TBD.)
 
-### Quickstart
+### Local lint and test
+
+Run this within your isolated dev environment, or launch a [Fresh](https://gerrit.wikimedia.org/g/fresh/) shell.
+
+One time:
+
+```
+phatality$ npm ci
+```
+
+Run QUnit tests:
+
+```
+phatality$ npm test
+```
+
+## Quickstart
+
 Ensure you have yarn and the required node version installed.  Node version can be found in the OpenSearch Dashboards repo in the `.node-version` file.
 
 ```bash
   export DASHBOARDS_VERSION='1.2.0'
   git clone https://github.com/opensearch-project/OpenSearch-Dashboards.git
   cd OpenSearch-Dashboards
-  git checkout tags/$DASHBOARDS_VERSION"
+  git checkout "tags/$DASHBOARDS_VERSION"
   yarn osd bootstrap
   cd plugins
   git clone "https://gerrit.wikimedia.org/r/releng/phatality" && (cd "phatality" && mkdir -p .git/hooks && curl -Lo `git rev-parse --git-dir`/hooks/commit-msg https://gerrit.wikimedia.org/r/tools/hooks/commit-msg; chmod +x `git rev-parse --git-dir`/hooks/commit-msg)

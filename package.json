@@ -5,6 +5,12 @@
   "scripts": {
     "build": "yarn plugin-helpers build",
     "plugin-helpers": "node ../../scripts/plugin_helpers",
-    "osd": "node ../../scripts/osd"
+    "osd": "node ../../scripts/osd",
+    "test": "TS_NODE_PROJECT=tsconfig.ci.json qunit --require ts-node/register test/*.js"
+  },
+  "devDependencies": {
+    "qunit": "^2.18.0",
+    "typescript": "4.0.2",
+    "ts-node": "^9.1.1"
   }
 }

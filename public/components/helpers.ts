@@ -1,8 +1,12 @@
 const searchUrl = 'https://phabricator.wikimedia.org/maniphest/query/advanced/';
 const formUrl = 'https://phabricator.wikimedia.org/maniphest/task/edit/form/46/';
 
-/** Convert the message digest into a hex string encoding */
-export function hexString(buffer:ArrayBuffer) {
+/**
+ * Convert the message digest into a hex string encoding
+ *
+ * @param {ArrayBuffer} buffer
+ */
+export function hexString(buffer) {
   const byteArray = new Uint8Array(buffer);
   const hexCodes = [...byteArray].map(value => {
     const hexCode = value.toString(16);
@@ -11,28 +15,25 @@ export function hexString(buffer:ArrayBuffer) {
   return hexCodes.join('');
 }
 
-export function digestSha256(message:string) {
+export function digestSha256(message) {
   const encoder = new TextEncoder();
   const data = encoder.encode(message);
   return window.crypto.subtle.digest('SHA-256', data);
 }
 
 /** Make a phabricator remarkup code block with optional header */
-export function markupCodeBlock(header:string, content:string) {
+export function markupCodeBlock(header, content) {
   if (!content) {
     content = header;
     header = '';
   }
   return "\n```" + header + "\n" + content + "\n```";
 }
-interface PhabUrlParams {
-  id: string,
-  title: string,
-  desc: string,
-  url: string,
-}
 
-export function makeTitle(doc:Record<string, any>) {
+/**
+ * @param {Record<string, any>} doc
+ */
+export function makeTitle(doc) {
   // When a runtime error is logged by PHP, this is turned into an ErrorException
   // temporarily to obtain a trace. It is not actually an exception that is thrown
   // or left uncaught, though, so report only the message that PHP developers are
@@ -52,7 +53,11 @@ export function makeTitle(doc:Record<string, any>) {
   }
 }
 
-export function makeAnonymousUrl(server:string|undefined, urlPath:string|undefined) {
+/**
+ * @param {string|undefined} server
+ * @param {string|undefined} urlPath
+ */
+export function makeAnonymousUrl(server, urlPath) {
   if (!server || !urlPath) {
     return '';
   }
@@ -84,7 +89,12 @@ export function makeAnonymousUrl(server:string|undefined, urlPath:string|undefin
   }
 }
 
-function makeLogstashTimedQueryUrl(key:string, value:string, timestamp:string|undefined) {
+/**
+ * @param {string} key
+ * @param {string} value
+ * @param {string|undefined} timestamp
+ */
+function makeLogstashTimedQueryUrl(key, value, timestamp) {
   // Give the query a 1-2 day range, instead of all of `from:now-90d,to:now` (which would be slow).
   // It would make sense to reduce this to just a 1 hour range, but that's not actually much faster,
   // and it's problem because, despite ISO dates having a trailing Z both in doc.timestamp, and
@@ -109,7 +119,7 @@ function makeLogstashTimedQueryUrl(key:string, value:string, timestamp:string|un
     + `&_a=(query:(query_string:(query:${encodeURI(`'${key}:"${value}"'`)})))`
 }
 
-function sanitizeTrace(trace:string) {
+function sanitizeTrace(trace) {
   if (trace && /['"]/.test(trace)) {
     // Redacted stack traces from MediaWiki only contain file paths, methods, and arg types.
     // If a quote character is found, it most likely means redaction is broken,
@@ -121,8 +131,11 @@ function sanitizeTrace(trace:string) {
   return trace;
 }
 
-/** Make the url for a pre-filled phabricator error report form */
-export function makePhabDesc(doc:Record<string, any>) {
+/**
+ * Make the url for a pre-filled phabricator error report form
+ * @param {Record<string, any>} doc
+ */
+export function makePhabDesc(doc) {
   let messageBlock = markupCodeBlock('name=normalized_message', doc.normalized_message);
 
   let stackBlock = markupCodeBlock('name=exception.trace,lines=10', sanitizeTrace(doc['exception.trace']));
@@ -149,8 +162,19 @@ ${stackBlock}
   return desc;
 }
 
-/** Make the url for a pre-filled Phabricator error report form */
-export function makePhabSubmitUrl(params: PhabUrlParams) {
+/**
+ * @typedef {Object} PhabUrlParams
+ * @property {string} id
+ * @property {string} title
+ * @property {string} desc
+ * @property {string} url
+ */
+
+/**
+ * Make the url for a pre-filled Phabricator error report form
+ * @param {PhabUrlParams} params
+ */
+export function makePhabSubmitUrl(params) {
   const query = new URLSearchParams();
   query.append('custom.error.id', params.id);
   query.append('title', params.title);
@@ -160,11 +184,17 @@ export function makePhabSubmitUrl(params: PhabUrlParams) {
   return `${formUrl}?${query.toString()}`;
 }
 
-/** Make the url to search phabricator for a given phatalityId */
-export function makePhabSearchUrl(phatalityId:string) {
+/**
+ * Make the url to search phabricator for a given phatalityId
+ * @param {string} phatalityId
+ */
+export function makePhabSearchUrl(phatalityId) {
   return `${searchUrl}?std:maniphest:error.id=${phatalityId}#R`;
 }
 
-export function openNewTab(url:string) {
+/**
+ * @param {string} url
+ */
+export function openNewTab(url) {
   window.open(url, '_blank')
 }
