@@ -34,23 +34,22 @@ export function markupCodeBlock(header, content) {
  * @param {Record<string, any>} doc
  */
 export function makeTitle(doc) {
-  // When a runtime error is logged by PHP, this is turned into an ErrorException
-  // temporarily to obtain a trace. It is not actually an exception that is thrown
-  // or left uncaught, though, so report only the message that PHP developers are
-  // familiar with from their server logs or IDE (ignore the fake class).
-  if (doc['exception.class'] === 'ErrorException') {
-    return doc['exception.message'];
-  }
-
-  // MediaWiki does not (yet) override normalized_message for exceptions to omit
-  // the reqId/url placeholders (which we want to exclude from the task title).
-  // For now, immitate what MediaWiki's MWExceptionHandler.php#getLogNormalMessage does
-  // but without those placeholders in front.
-  if (doc['exception.class']) {
-    return `${doc['exception.class']}: ${doc['exception.message']}`;
-  } else {
-    return doc.normalized_message || doc.message;
-  }
+  // Prefer normalized_message because:
+  //
+  // * It naturally avoids PII that shouldn't be copied to Phab.
+  // * It tends to be shorter, e.g. no "ErrorException from line .." noise.
+  // * It tends to be more focussed on the problem rather than specifics of one sample.
+  // * It is pre-trimmed by the log producer if it is very long, which also
+  //   further avoids PII from rare messages that don't use normalization.
+  const title = doc.normalized_message || doc.message;
+  return title
+    // Strip "[{reqId}] {exception_url}   "
+    //
+    // MediaWiki should omit these. It does already for most messages, since
+    // they are part of the log context either way, but for exceptions we still
+    // put it in there as otherwise reqId/url wouldn't be in debug.log during
+    // CI and development.
+    .replace(/^\s*\[{reqId}\]\s*{exception_url}\s*/, '');
 }
 
 /**
