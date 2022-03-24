@@ -8,17 +8,7 @@ This adds a custom document renderer which includes two new buttons:
  * Opens the phabricator "Submit Error Code" form with values
    pre-filled with values from the selected log entry
 2. ? Search Phabricator
- * Opens the phabricator advanced search form with the Phatality ID
-   pre-filled
-
-The "Phatality ID" is a sha256 hash of a few log entry fields combined
-such that it should uniquely identify a given error but remain stable
-across multiple wmf production branches.
-
-Specifically, the Mediawiki version number is stripped from error messages
-and stack traces so that errors on the `wmf.n` and `wmf.n+1` branches will
-both resolve to the same hash. That is, so long as only the filesystem path
-prefix is different but the file name, function name, etc remain unchanged.
+ * Opens the Phabricator search form with a pre-filled query
 
 ---
 

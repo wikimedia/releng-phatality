@@ -43,4 +43,26 @@ QUnit.module('helpers', () => {
   }, (assert, data) => {
     assert.equal(helpers.makeTitle(data.doc), data.title);
   });
+
+  QUnit.test('makePhabSearchUrl', (assert) => {
+    const doc = {
+      normalized_message: 'InvalidArgumentException: Cannot foo',
+      message: 'InvalidArgumentException: Cannot foo',
+    };
+
+    const actualUrl = helpers.makePhabSearchUrl(doc);
+    const actual = new URL(actualUrl).searchParams.get('query');
+    assert.equal(actual, '"InvalidArgumentException:" "Cannot" "foo"');
+  });
+
+  QUnit.test('makePhabSearchUrl [quotes]', (assert) => {
+    const doc = {
+      message: 'Exception: Unknown action "foo"""bar"',
+    };
+
+    const actualUrl = helpers.makePhabSearchUrl(doc);
+    const actual = new URL(actualUrl).searchParams.get('query');
+    assert.equal(actual, '"Exception:" "Unknown" "action" "foo" "bar"');
+  });
+
 });

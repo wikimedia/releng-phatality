@@ -3,8 +3,6 @@ import { DocViewRenderProps } from '../types';
 import { EuiButton } from "@elastic/eui";
 import {
   makeAnonymousUrl,
-  digestSha256,
-  hexString,
   makePhabDesc,
   makePhabSearchUrl,
   makePhabSubmitUrl,
@@ -14,11 +12,9 @@ import {
 import { PhatalityLine, PhatalityArea } from './row';
 
 interface PhatalityState {
-  phatalityIdSrc: string,
   title: string,
   desc: string,
   url: string,
-  phatalityId: string,
   phabSearchUrl: string,
   phabShortUrl: string,
   phabUrl: string,
@@ -32,13 +28,11 @@ export class PhatalityTab extends React.Component<DocViewRenderProps, {}> {
     let doc = props.indexPattern.flattenHit(props.hit);
 
     this.state = {
-      phatalityIdSrc: doc.normalized_message || doc.message,
       title: makeTitle(doc),
       desc: makePhabDesc(doc),
       url: makeAnonymousUrl(doc.server, doc.url),
+      phabSearchUrl: makePhabSearchUrl(doc),
       // Computed later
-      phatalityId: '',
-      phabSearchUrl: '',
       phabShortUrl: '',
       phabUrl: ''
     };
@@ -46,25 +40,17 @@ export class PhatalityTab extends React.Component<DocViewRenderProps, {}> {
 
 
   componentDidMount(): void {
-    // Make a hash of the phatalityId instead of using the raw string:
-    digestSha256(this.state.phatalityIdSrc).then(digestValue => {
-      let digestString = hexString(digestValue);
-      this.setState({
-        phatalityId: digestString,
-        phabSearchUrl: makePhabSearchUrl(digestString),
-        phabUrl: makePhabSubmitUrl({
-          id: digestString,
-          title: this.state.title,
-          desc: this.state.desc,
-          url: this.state.url,
-        }),
-        phabShortUrl: makePhabSubmitUrl({
-          id: digestString,
-          title: this.state.title,
-          desc: '',
-          url: this.state.url,
-        }),
-      });
+    this.setState({
+      phabUrl: makePhabSubmitUrl({
+        title: this.state.title,
+        desc: this.state.desc,
+        url: this.state.url,
+      }),
+      phabShortUrl: makePhabSubmitUrl({
+        title: this.state.title,
+        desc: '',
+        url: this.state.url,
+      }),
     });
   }
 
@@ -92,7 +78,6 @@ export class PhatalityTab extends React.Component<DocViewRenderProps, {}> {
             }
           </td>
         </tr>
-        <PhatalityLine field='phatalityId' value={this.state.phatalityId}/>
         <PhatalityLine field='title' value={this.state.title}/>
         <PhatalityArea field='desc' value={this.state.desc}/>
         <PhatalityLine field='url' value={this.state.url}/>

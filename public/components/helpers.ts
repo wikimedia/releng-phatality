@@ -1,25 +1,5 @@
-const searchUrl = 'https://phabricator.wikimedia.org/maniphest/query/advanced/';
+const searchUrl = 'https://phabricator.wikimedia.org/search/';
 const formUrl = 'https://phabricator.wikimedia.org/maniphest/task/edit/form/46/';
-
-/**
- * Convert the message digest into a hex string encoding
- *
- * @param {ArrayBuffer} buffer
- */
-export function hexString(buffer) {
-  const byteArray = new Uint8Array(buffer);
-  const hexCodes = [...byteArray].map(value => {
-    const hexCode = value.toString(16);
-    return hexCode.padStart(2, '0');
-  });
-  return hexCodes.join('');
-}
-
-export function digestSha256(message) {
-  const encoder = new TextEncoder();
-  const data = encoder.encode(message);
-  return window.crypto.subtle.digest('SHA-256', data);
-}
 
 /** Make a phabricator remarkup code block with optional header */
 export function markupCodeBlock(header, content) {
@@ -175,7 +155,6 @@ ${stackBlock}
  */
 export function makePhabSubmitUrl(params) {
   const query = new URLSearchParams();
-  query.append('custom.error.id', params.id);
   query.append('title', params.title);
   query.append('description', params.desc);
   query.append('custom.error.url', params.url);
@@ -184,11 +163,20 @@ export function makePhabSubmitUrl(params) {
 }
 
 /**
- * Make the url to search phabricator for a given phatalityId
- * @param {string} phatalityId
+ * Make the url to search query for open tasks on Phabricator
+ * @param {Record<string, any>} doc
  */
-export function makePhabSearchUrl(phatalityId) {
-  return `${searchUrl}?std:maniphest:error.id=${phatalityId}#R`;
+export function makePhabSearchUrl(doc) {
+  // Phabricator search treats colons and other characters as special,
+  // thus searching "Exception: Missing foo" (unquoted) causes an error.
+  //
+  // As workaround, quote each word. Don't quote in one go, in order
+  // to retain loose matching, which helps find related tasks and avoids
+  // duplicate tasks with variations on the same title.
+  const title = makeTitle(doc);
+  const stripped = title.replace(/"+/g, ' ').trim();
+  const titleEnc = encodeURIComponent('"' + stripped.replace(/\s+/g, '" "') + '"');
+  return `${searchUrl}?search:primary=true&search:scope=open-tasks&query=${titleEnc}#R`;
 }
 
 /**
