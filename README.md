@@ -37,7 +37,7 @@ phatality$ npm test
 Ensure you have yarn and the required node version installed.  Node version can be found in the OpenSearch Dashboards repo in the `.node-version` file.
 
 ```bash
-  export DASHBOARDS_VERSION='1.2.0'
+  export DASHBOARDS_VERSION='2.2.0'
   git clone https://github.com/opensearch-project/OpenSearch-Dashboards.git
   cd OpenSearch-Dashboards
   git checkout "tags/$DASHBOARDS_VERSION"
@@ -46,7 +46,7 @@ Ensure you have yarn and the required node version installed.  Node version can 
   git clone "https://gerrit.wikimedia.org/r/releng/phatality" && (cd "phatality" && mkdir -p .git/hooks && curl -Lo `git rev-parse --git-dir`/hooks/commit-msg https://gerrit.wikimedia.org/r/tools/hooks/commit-msg; chmod +x `git rev-parse --git-dir`/hooks/commit-msg)
 ```
 
-Now we can start the development server.  Make sure you have a local instance of ElasticSearch running.
+Now we can start the development server.  Make sure you have a local instance of OpenSearch running.
 ```
   cd OpenSearch-Dashboards
   yarn start --oss
@@ -59,7 +59,7 @@ To deploy to wikimedia production:
 ### On your workstation:
 ```bash
   cd OpenSearch-Dashboards/plugins/phatality
-  yarn build --opensearch-dashboards-version 1.2.0
+  yarn build --opensearch-dashboards-version 2.2.0
   cp build/*.zip deploy/
   git add deploy/*; git commit -m 'updated zip for deployment'
   git push origin master
