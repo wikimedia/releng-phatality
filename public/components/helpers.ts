@@ -1,19 +1,40 @@
+import { PhatalityDoc } from './phatalitydoc';
+
 const searchUrl = 'https://phabricator.wikimedia.org/search/';
 const formUrl = 'https://phabricator.wikimedia.org/maniphest/task/edit/form/46/';
+const logstashDashboardUrl = 'https://logstash.wikimedia.org/app/dashboards#/view/AXFV7JE83bOlOASGccsT';
 
 /** Make a phabricator remarkup code block with optional header */
-export function markupCodeBlock(header, content) {
+export function markupCodeBlock(header:string, content:string) {
   if (!content) {
     content = header;
     header = '';
   }
-  return "\n```" + header + "\n" + content + "\n```";
+  return "\n```name=" + header + ",lines=10\n" + content + "\n```";
+}
+
+/** Make a phabricator remarkup section with header */
+export function markupSection(header:string) {
+  return `\n==== ${header} ====\n\n`
+}
+
+/** Make a phabricator remarkup bullet */
+export function markupBullet(content:string) {
+  return `* ${content}\n`
+}
+
+/** Make a phabricator remarkup hyperlink */
+export function markupHyperlink(url:string, link_text:string) {
+  return `[[ ${url} | ${link_text} ]]`
 }
 
 /**
- * @param {Record<string, any>} doc
+ * @param {PhatalityDoc} doc
  */
-export function makeTitle(doc) {
+export function makeTitle(doc:PhatalityDoc) {
+  if (!doc.supported) {
+    return '';
+  }
   // Prefer normalized_message because:
   //
   // * It naturally avoids PII that shouldn't be copied to Phab.
@@ -21,7 +42,7 @@ export function makeTitle(doc) {
   // * It tends to be more focussed on the problem rather than specifics of one sample.
   // * It is pre-trimmed by the log producer if it is very long, which also
   //   further avoids PII from rare messages that don't use normalization.
-  const title = doc.normalized_message || doc.message;
+  const title = doc.normalizedMessage || doc.message;
   return title
     // Strip "[{reqId}] {exception_url}   "
     //
@@ -33,16 +54,14 @@ export function makeTitle(doc) {
 }
 
 /**
- * @param {string|undefined} server
- * @param {string|undefined} urlPath
+ * @param {PhatalityDoc} doc
  */
-export function makeAnonymousUrl(server, urlPath) {
-  if (!server || !urlPath) {
+export function makeAnonymousUrl(doc:PhatalityDoc) {
+  if (!doc.supported) {
     return '';
   }
-  const url = `https://${server}${urlPath}`;
   try {
-    const parsed = new URL(url);
+    const parsed = new URL(doc.url);
     parsed.searchParams.forEach((value, param) => {
       // Replace values that may be personal or personally identifying,
       // either by themselves or through correlation (differential privacy).
@@ -69,35 +88,40 @@ export function makeAnonymousUrl(server, urlPath) {
 }
 
 /**
- * @param {string} key
- * @param {string} value
- * @param {string|undefined} timestamp
+ * @param {PhatalityDoc} doc
  */
-function makeLogstashTimedQueryUrl(key, value, timestamp) {
+function makeLogstashTimedQueryUrl(doc:PhatalityDoc) {
+  if (!doc.supported) {
+    return '';
+  }
   // Give the query a 1-2 day range, instead of all of `from:now-90d,to:now` (which would be slow).
   // It would make sense to reduce this to just a 1 hour range, but that's not actually much faster,
   // and it's problem because, despite ISO dates having a trailing Z both in doc.timestamp, and
   // in Date#toISOString output, OpenSearch Dashboards still manages to get timezone-confused, which means
   // people outside UTC wouldn't find anything.
-  let from = timestamp ? new Date(timestamp) : new Date();
+  let from = doc.timestamp ? new Date(doc.timestamp) : new Date();
   from.setDate(from.getDate() - 1);
   let fromstr = from.toISOString();
-  let to = timestamp ? new Date(timestamp) : new Date();
+  let to = doc.timestamp ? new Date(doc.timestamp) : new Date();
   to.setDate(to.getDate() + 1);
   to.setTime(Math.min(to.getTime(), Date.now()));
   let tostr = to.toISOString();
 
   // Use the main "mediawiki" dashboard
-  return 'https://logstash.wikimedia.org/app/dashboards#/view/AXFV7JE83bOlOASGccsT'
+  return logstashDashboardUrl
     // OpenSearch Dashboards uses the incomprehensible Rison format for this purpose.
     // It is important that the values use single quotes, not double quotes.
     // https://www.elastic.co/guide/en/kibana/7.12/url_templating-language.html
     // https://github.com/w33ble/rison-node
     + `?_g=(time:(from:'${fromstr}',to:'${tostr}'))`
     // Use double quotes on the inner portion (that's the Lucene query)
-    + `&_a=(query:(query_string:(query:${encodeURI(`'${key}:"${value}"'`)})))`
+    // NOTE: reqId hardcoded for compatibility with "mediawiki" dashboard (AXFV7JE83bOlOASGccsT)
+    + `&_a=(query:(query_string:(query:${encodeURI(`'reqId:"${doc.requestId}"'`)})))`
 }
 
+/**
+ * @param {string} trace
+ */
 function sanitizeTrace(trace) {
   if (trace && /['"]/.test(trace)) {
     // Redacted stack traces from MediaWiki only contain file paths, methods, and arg types.
@@ -112,33 +136,22 @@ function sanitizeTrace(trace) {
 
 /**
  * Make the url for a pre-filled phabricator error report form
- * @param {Record<string, any>} doc
+ * @param {PhatalityDoc} doc
  */
-export function makePhabDesc(doc) {
-  let messageBlock = markupCodeBlock('name=normalized_message', doc.normalized_message);
-
-  let stackBlock = markupCodeBlock('name=exception.trace,lines=10', sanitizeTrace(doc['exception.trace']));
-  if (doc['exception.previous.trace']) {
-    stackBlock += markupCodeBlock('name=exception.previous.trace,lines=10', sanitizeTrace(doc['exception.previous.trace']));
+export function makePhabDesc(doc:PhatalityDoc) {
+  if (!doc.supported) {
+    return '';
   }
-
-  let desc = `==== Error  ====
-
-* mwversion: \`${doc.mwversion}\`
-* reqId: \`${doc.reqId}\`
-* [[ ${makeLogstashTimedQueryUrl('reqId', doc.reqId, doc.timestamp)} | Find reqId in Logstash ]]
-
-${messageBlock}
-${stackBlock}
-
-==== Impact ====
-
-
-==== Notes ====
-
-`;
-
-  return desc;
+  let output = markupSection('Error')
+    + markupBullet(`${doc.fieldMap.version}: ${doc.version}`)
+    + markupBullet(`${doc.fieldMap.requestId}: ${doc.requestId}`)
+    + markupBullet(`${markupHyperlink(makeLogstashTimedQueryUrl(doc), `Find ${doc.fieldMap.requestId} in Logstash`)}`)
+    + markupCodeBlock(doc.fieldMap.normalizedMessage, doc.normalizedMessage)
+    + markupCodeBlock(doc.fieldMap.stackTrace, sanitizeTrace(doc.stackTrace));
+  if (doc.previousStackTrace) {
+    output += markupCodeBlock(doc.fieldMap.previousStackTrace, sanitizeTrace(doc.previousStackTrace));
+  }
+  return output + markupSection('Impact') + markupSection('Notes');
 }
 
 /**
@@ -164,9 +177,12 @@ export function makePhabSubmitUrl(params) {
 
 /**
  * Make the url to search query for open tasks on Phabricator
- * @param {Record<string, any>} doc
+ * @param {PhatalityDoc} doc
  */
-export function makePhabSearchUrl(doc) {
+export function makePhabSearchUrl(doc:PhatalityDoc) {
+  if (!doc.supported) {
+    return '';
+  }
   // Phabricator search treats colons and other characters as special,
   // thus searching "Exception: Missing foo" (unquoted) causes an error.
   //

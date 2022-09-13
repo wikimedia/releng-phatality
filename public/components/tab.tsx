@@ -9,9 +9,11 @@ import {
   makeTitle,
   openNewTab,
 } from './helpers';
+import { PhatalityDoc } from './phatalitydoc'
 import { PhatalityLine, PhatalityArea } from './row';
 
 interface PhatalityState {
+  supported: boolean,
   title: string,
   desc: string,
   url: string,
@@ -25,19 +27,19 @@ export class PhatalityTab extends React.Component<DocViewRenderProps, {}> {
 
   constructor(props:DocViewRenderProps) {
     super(props);
-    let doc = props.indexPattern.flattenHit(props.hit);
+    let doc = new PhatalityDoc(props.indexPattern.flattenHit(props.hit));
 
     this.state = {
+      supported: doc.supported,
       title: makeTitle(doc),
       desc: makePhabDesc(doc),
-      url: makeAnonymousUrl(doc.server, doc.url),
+      url: makeAnonymousUrl(doc),
       phabSearchUrl: makePhabSearchUrl(doc),
       // Computed later
       phabShortUrl: '',
       phabUrl: ''
     };
   }
-
 
   componentDidMount(): void {
     this.setState({
@@ -55,6 +57,17 @@ export class PhatalityTab extends React.Component<DocViewRenderProps, {}> {
   }
 
   render() {
+    if (!this.state.supported) {
+      return (
+        <table className="table table-condensed osdDocViewerTable">
+          <tbody>
+          <tr>
+            <td>&nbsp;</td><td>Document not yet supported by Phatality.</td>
+          </tr>
+          </tbody>
+        </table>
+      )
+    }
     return (
       <table className="table table-condensed kbnDocViewerTable">
         <tbody>
