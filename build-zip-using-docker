@@ -6,7 +6,6 @@ DASHBOARDS_VERSION=2.2.0
 
 docker build \
        --build-arg DASHBOARDS_VERSION=$DASHBOARDS_VERSION \
-       --build-arg "CACHEBUSTER=$(date)" \
        -t phatality-build .
 id=$(docker run -d --entrypoint /bin/sleep phatality-build:latest 3600)
 trap "docker rm -f $id" EXIT

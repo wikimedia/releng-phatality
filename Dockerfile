@@ -19,8 +19,5 @@ RUN git clone --depth=1 --branch="$DASHBOARDS_VERSION" \
 RUN cd /src/OpenSearch-Dashboards && yarn osd bootstrap
 
 # Phatality stuff
-
-ARG CACHEBUSTER
-RUN echo $CACHEBUSTER > /dev/null
-RUN git clone --depth=1 "https://gerrit.wikimedia.org/r/releng/phatality" /src/OpenSearch-Dashboards/plugins/phatality
+COPY --chown=node:node . /src/OpenSearch-Dashboards/plugins/phatality
 RUN cd /src/OpenSearch-Dashboards/plugins/phatality && yarn build --opensearch-dashboards-version $DASHBOARDS_VERSION
