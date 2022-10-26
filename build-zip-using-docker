@@ -2,7 +2,7 @@
 
 set -eu -o pipefail
 
-DASHBOARDS_VERSION=1.2.0
+DASHBOARDS_VERSION=2.2.0
 
 docker build \
        --build-arg DASHBOARDS_VERSION=$DASHBOARDS_VERSION \

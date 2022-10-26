@@ -1,6 +1,6 @@
-FROM node:10
+FROM node:14.20.0
 
-ARG DASHBOARDS_VERSION=1.2.0
+ARG DASHBOARDS_VERSION=2.2.0
 
 RUN apt-get update \
   && DEBIAN_FRONTEND=noninteractive apt-get upgrade -y \
