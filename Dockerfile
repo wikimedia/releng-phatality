@@ -12,10 +12,10 @@ USER node
 
 # OpenSearch Dashboards stuff
 
-# WARNING: This a 2.7GB repo and since we need to check out a tag, we can't
-# use --depth=1. 
-RUN git clone https://github.com/opensearch-project/OpenSearch-Dashboards.git /src/OpenSearch-Dashboards
-RUN git -C /src/OpenSearch-Dashboards checkout "tags/$DASHBOARDS_VERSION"
+# WARNING: This a 2.7GB repo. Use a shallow clone
+RUN git clone --depth=1 --branch="$DASHBOARDS_VERSION" \
+  https://github.com/opensearch-project/OpenSearch-Dashboards.git \
+  /src/OpenSearch-Dashboards
 RUN cd /src/OpenSearch-Dashboards && yarn osd bootstrap
 
 # Phatality stuff
