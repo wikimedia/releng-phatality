@@ -2,8 +2,10 @@ FROM node:10
 
 ARG DASHBOARDS_VERSION=1.2.0
 
-RUN apt-get update
-RUN apt-get upgrade -y
+RUN apt-get update \
+  && DEBIAN_FRONTEND=noninteractive apt-get upgrade -y \
+  && apt-get clean \
+  && rm -rf /var/lib/apt/lists/*
 
 RUN mkdir /src && chown node: /src
 USER node
