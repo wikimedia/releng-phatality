@@ -1,6 +1,7 @@
 FROM node:14.20.0
 
-ARG DASHBOARDS_VERSION=2.4.1
+ARG DASHBOARDS_VERSION
+RUN if [ -z "$DASHBOARDS_VERSION" ]; then echo DASHBOARDS_VERSION must be set using --build-arg DASHBOARDS_VERSION=x.y.z; exit 1; fi
 
 RUN apt-get update \
   && DEBIAN_FRONTEND=noninteractive apt-get upgrade -y \

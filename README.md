@@ -58,11 +58,15 @@ To deploy to wikimedia production:
 
 ### On your workstation:
 ```bash
-  cd OpenSearch-Dashboards/plugins/phatality
-  yarn build --opensearch-dashboards-version 2.4.1
-  cp build/*.zip deploy/
-  git add deploy/*; git commit -m 'updated zip for deployment'
-  git push origin master
+DASHBOARDS_VERSION=2.4.1
+./build-zip-using-docker $DASHBOARDS_VERSION
+```
+This will create a ```deploy/phatality-$DASHBOARDS_VERSION.zip``` file.  Add it to the repository
+and push to Gerrit, skipping code review:
+```bash
+git add deploy/phatality-$DASHBOARDS_VERSION.zip
+git commit -m "Add deploy/phatality-$DASHBOARDS_VERSION.zip for deployment"
+git push origin master
 ```
 
 ### On the deployment server
