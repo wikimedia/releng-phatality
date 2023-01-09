@@ -1,6 +1,6 @@
 {
   "name": "phatality",
-  "version": "2.2.0",
+  "version": "2.4.1",
   "private": true,
   "scripts": {
     "build": "yarn plugin-helpers build",
