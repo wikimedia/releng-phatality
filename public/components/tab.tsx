@@ -86,7 +86,7 @@ export class PhatalityTab extends React.Component<DocViewRenderProps, {}> {
             </EuiButton>
             { this.state.phabUrl.length > 1600 &&
               <div>
-                Warning: The description is too long to submit by URL. Please copy it manually.
+                <strong>Warning</strong>: The description is too long to submit by URL. Please copy it manually.
               </div>
             }
           </td>
