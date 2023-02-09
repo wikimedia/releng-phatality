@@ -69,7 +69,7 @@ export class PhatalityTab extends React.Component<DocViewRenderProps, {}> {
       )
     }
     return (
-      <table className="table table-condensed kbnDocViewerTable">
+      <table className="table table-condensed osdDocViewerTable">
         <tbody>
         <tr>
           <td>Phabricator actions:</td>
