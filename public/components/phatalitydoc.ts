@@ -85,6 +85,6 @@ export class PhatalityDoc implements PhatalityDocType {
     if (!doc.server || !doc.url) {
       return '';
     }
-    return `https://${doc.server}${doc.urlpath}`;
+    return `https://${doc.server}${doc.url}`;
   }
 }
