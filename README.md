@@ -32,6 +32,13 @@ Run QUnit tests:
 phatality$ npm test
 ```
 
+Alternatively, you can use the "test" Dockerfile target.
+
+```
+phatality$ docker build --target test -t localhost/phatality:test .
+phatality$ docker run --rm -t localhost/phatality:test
+```
+
 ## Quickstart
 
 Ensure you have yarn and the required node version installed.  Node version can be found in the OpenSearch Dashboards repo in the `.node-version` file.
