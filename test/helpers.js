@@ -89,4 +89,16 @@ QUnit.module('helpers', () => {
     assert.equal(actual, '"Exception:" "Unknown" "action" "foo" "bar"');
   });
 
+  QUnit.test('markupTable', (assert) => {
+    assert.equal(
+      helpers.markupTable(
+        [['Foo', 'Header']],
+        [['foo', 'data']],
+      ),
+      '\n' +
+      '| Foo | Header\n' +
+      '| -- | --\n' +
+      '| foo | data'
+    );
+  });
 });

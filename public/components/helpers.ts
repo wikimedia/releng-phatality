@@ -1,4 +1,5 @@
 import { PhatalityDoc } from './phatalitydoc';
+import { Stacktrace } from './stacktrace';
 
 const searchUrl = 'https://phabricator.wikimedia.org/search/';
 const formUrl = 'https://phabricator.wikimedia.org/maniphest/task/edit/form/46/';
@@ -11,6 +12,29 @@ export function markupCodeBlock(header:string, content:string) {
     header = '';
   }
   return "\n```name=" + header + ",lines=10\n" + content + "\n```";
+}
+
+/** Make a phabricator remarkup table with optional header rows */
+export function markupTable(headers:Array<Array<string>>, rows:Array<Array<string>>) {
+  let header = '';
+
+  if (headers) {
+    let maxWidth = 0;
+
+    header += headers.map((cells): string => {
+      if (cells.length > maxWidth) {
+        maxWidth = cells.length;
+      }
+
+      return '| ' + cells.join(' | ');
+    }).join("\n") + "\n";
+
+    header += '| ' + Array.from({ length: maxWidth }, () => '--').join(' | ') + '\n';
+  }
+
+  return "\n" + header + rows.filter((cells) => cells.length > 0).map((cells): string => {
+    return '| ' + cells.join(' | ');
+  }).join("\n");
 }
 
 /** Make a phabricator remarkup section with header */
@@ -120,6 +144,40 @@ function makeLogstashTimedQueryUrl(doc:PhatalityDoc) {
 }
 
 /**
+ * Try to render the stacktrace as a table with git blame information but
+ * fallback to a code block.
+ */
+export function markupStackTrace(header: string, trace: string) {
+  try {
+    return makeStackTraceTable(trace);
+  } catch (e) {
+    console.error(e);
+    return markupCodeBlock(header, trace);
+  }
+}
+
+/**
+ * Make a phabricator remarkup table for the stacktrace and link location to
+ * the git blame.
+ **/
+export function makeStackTraceTable(trace:string) {
+  const stacktrace = new Stacktrace(trace);
+  return markupTable(
+    [['Frame', 'Location', 'Call']],
+    stacktrace.frames.map(frame => {
+      let location = frame.location;
+      const blameURL = frame.getBlameURL();
+
+      if (blameURL !== undefined) {
+        location = markupHyperlink(blameURL.toString(), location);
+      }
+
+      return [frame.id, location, frame.call];
+    }),
+  );
+}
+
+/**
  * @param {string} trace
  */
 function sanitizeTrace(trace) {
@@ -147,7 +205,7 @@ export function makePhabDesc(doc:PhatalityDoc) {
     + markupBullet(`${doc.fieldMap.requestId}: ${doc.requestId}`)
     + markupBullet(`${markupHyperlink(makeLogstashTimedQueryUrl(doc), `Find ${doc.fieldMap.requestId} in Logstash`)}`)
     + markupCodeBlock(doc.fieldMap.normalizedMessage, doc.normalizedMessage)
-    + markupCodeBlock(doc.fieldMap.stackTrace, sanitizeTrace(doc.stackTrace));
+    + markupStackTrace(doc.fieldMap.stackTrace, sanitizeTrace(doc.stackTrace));
   if (doc.previousStackTrace) {
     output += markupCodeBlock(doc.fieldMap.previousStackTrace, sanitizeTrace(doc.previousStackTrace));
   }
