@@ -1,4 +1,5 @@
 /build
+/scap/log
 /target
 /.idea
 /node_modules
