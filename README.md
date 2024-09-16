@@ -44,7 +44,7 @@ phatality$ docker run --rm -t localhost/phatality:test
 Ensure you have yarn and the required node version installed.  Node version can be found in the OpenSearch Dashboards repo in the `.node-version` file.
 
 ```bash
-  export DASHBOARDS_VERSION='2.4.1'
+  export DASHBOARDS_VERSION='2.7.0'
   git clone https://github.com/opensearch-project/OpenSearch-Dashboards.git
   cd OpenSearch-Dashboards
   git checkout "tags/$DASHBOARDS_VERSION"
@@ -65,7 +65,7 @@ To deploy to wikimedia production:
 
 ### On your workstation:
 ```bash
-DASHBOARDS_VERSION=2.4.1
+DASHBOARDS_VERSION=2.7.0
 ./build-zip-using-docker $DASHBOARDS_VERSION
 ```
 This will create a ```deploy/phatality-$DASHBOARDS_VERSION.zip``` file.  Add it to the repository
