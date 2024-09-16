@@ -1,4 +1,4 @@
-FROM node:14.20.1 as base
+FROM node:14.20.1 AS base
 
 RUN apt-get update \
   && DEBIAN_FRONTEND=noninteractive apt-get upgrade -y \
