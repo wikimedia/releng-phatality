@@ -1,11 +1,6 @@
 checks:
-  install_zip:
+  install_zip_and_restart_dashboards:
     type: command
     stage: promote
-    command: /usr/share/opensearch-dashboards/bin/upgrade-phatality.sh
-    timeout: 100
-  restart_dashboards:
-    type: command
-    stage: promote
-    command: sudo /usr/bin/systemctl restart opensearch-dashboards
-    timeout: 220
+    command: /usr/share/opensearch-dashboards/bin/upgrade-phatality.sh && sudo /usr/bin/systemctl restart opensearch-dashboards
+    timeout: 320
