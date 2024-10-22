@@ -99,7 +99,7 @@ export class GenericFrame implements ParsedFrame {
    */
   getBlameURL(): URL | undefined {
     if (this.project && this.projectRef && this.projectFile) {
-      return new URL(`${gitilesURL}/${this.project}/+/${this.projectRef}/${this.projectFile}#${this.line}`);
+      return new URL(`${gitilesURL}/${this.project}/+blame/${this.projectRef}/${this.projectFile}#${this.line}`);
     }
 
     return undefined;

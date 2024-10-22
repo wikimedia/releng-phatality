@@ -119,7 +119,7 @@ QUnit.module('stacktrace', () => {
 
       assert.deepEqual(
         frame.getBlameURL(),
-        new URL('https://gerrit.wikimedia.org/r/plugins/gitiles/mediawiki/core/+/refs/heads/wmf/1.41.0-wmf.1/includes/Foo.php#123'),
+        new URL('https://gerrit.wikimedia.org/r/plugins/gitiles/mediawiki/core/+blame/refs/heads/wmf/1.41.0-wmf.1/includes/Foo.php#123'),
       );
     });
   });
