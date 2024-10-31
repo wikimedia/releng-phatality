@@ -180,13 +180,18 @@ export function makeStackTraceTable(trace:string) {
 /**
  * @param {string} trace
  */
-function sanitizeTrace(trace) {
-  if (trace && /['"]/.test(trace)) {
+export function sanitizeTrace(trace) {
+  if (trace && /(?<!eval\(\))['"]/.test(trace)) {
     // Redacted stack traces from MediaWiki only contain file paths, methods, and arg types.
     // If a quote character is found, it most likely means redaction is broken,
     // or that the fatal was reported by PHP outside of MWExceptionHandler's ability
     // to intercept and redact it.
     // https://phabricator.wikimedia.org/T234014
+    //
+    // Note, however, there are cases where "eval()'d" expressions are present
+    // in the stacktrace and we need to preserve the trace. See the
+    // corresponding test for an example trace.
+    // https://phabricator.wikimedia.org/T378741
     return '(REDACTED)';
   }
   return trace;

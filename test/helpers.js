@@ -101,4 +101,30 @@ QUnit.module('helpers', () => {
       '| foo | data'
     );
   });
+
+  QUnit.test.each('sanitizeTrace', {
+    'typical': {
+      'trace': (
+        'from /srv/mediawiki/php-1.43.0-wmf.28/includes/libs/Message/ScalarParam.php(52)\n' +
+        '#0 /srv/mediawiki/php-1.43.0-wmf.28/includes/Message/Message.php(1344): Wikimedia\\Message\\ScalarParam->__construct(string, bool)\n'
+      ),
+      'redacted': false
+    },
+    'containing string': {
+      'trace': (
+        'from /srv/mediawiki/php-1.43.0-wmf.28/includes/libs/Message/ScalarParam.php(52)\n' +
+        '#0 /srv/mediawiki/php-1.43.0-wmf.28/includes/Message/Message.php(1344): Wikimedia\\Message\\ScalarParam->__construct(\'foo\', bool)\n'
+      ),
+      'redacted': true
+    },
+    'containing eval': {
+      'trace': (
+        'from /srv/mediawiki/php-1.44.0-wmf.1/includes/Html/TemplateParser.php(177) : eval()\'d code(64)\n' +
+        '#0 /srv/mediawiki/php-1.44.0-wmf.1/includes/Html/TemplateParser.php(177) : eval()\'d code(64): MWExceptionHandler::handleError(int, string, string, int, array)\n'
+      ),
+      'redacted': false
+    },
+  }, (assert, data) => {
+    assert.equal(helpers.sanitizeTrace(data.trace), data.redacted ? '(REDACTED)' : data.trace);
+  });
 });
