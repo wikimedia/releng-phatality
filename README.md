@@ -18,25 +18,9 @@ See the [kibana external plugin development](https://www.elastic.co/guide/en/kib
 
 ### Local lint and test
 
-Run this within your isolated dev environment, or launch a [Fresh](https://gerrit.wikimedia.org/g/fresh/) shell.
-
-One time:
-
 ```
-phatality$ npm ci
-```
-
-Run QUnit tests:
-
-```
-phatality$ npm test
-```
-
-Alternatively, you can use the "test" Dockerfile target.
-
-```
-phatality$ docker build --target test -t localhost/phatality:test .
-phatality$ docker run --rm -t localhost/phatality:test
+make prepare
+make test
 ```
 
 ## Quickstart
@@ -59,27 +43,23 @@ Now we can start the development server.  Make sure you have a local instance of
   yarn start --oss
 ```
 
-## Deployment
+## Versions
 
-To deploy to wikimedia production:
-
-### On your workstation:
-```bash
-DASHBOARDS_VERSION=2.7.0
-./build-zip-using-docker $DASHBOARDS_VERSION
+Plugins must be built against the [target OpenSearch Dashboards version](https://opensearch.org/docs/latest/install-and-configure/plugins/).  To facilitate this, [plugins have a 4th versioning digit for patch levels](https://github.com/opensearch-project/opensearch-plugins/blob/main/BUILDING.md#consume-dynamic-versions-of-opensearch-dependencies):
 ```
-This will create a ```deploy/phatality-$DASHBOARDS_VERSION.zip``` file.  Add it to the repository
-and push to Gerrit, skipping code review:
-```bash
-git add deploy/phatality-$DASHBOARDS_VERSION.zip
-git commit -m "Add deploy/phatality-$DASHBOARDS_VERSION.zip for deployment"
-git push origin master
+<semver opensearch version>.<plugin version>
 ```
 
-### On the deployment server
+Example: `2.7.0.1` = OpenSearch Dashboards `2.7.0`, Phatality version `1`
 
- fetch the change and run `scap deploy`:
+To set the version, update package.json with the four-digit version number and the Makefile will handle its propagation.
 
-- `cd /srv/deployment/releng/phatality; git pull`
-- `scap deploy`
+## Building
 
+Requires git, make, jq, and docker or podman.
+```bash
+make prepare
+make build
+```
+This will create a ```phatality-<version>.zip``` file in the root directory.  Upload this artifact to `apt.wikimedia.org:/srv/opensearch/`.
+Once the artifact is uploaded, create a patch to bump the phatality version in Puppet.  Once this Puppet patch is merged, Puppet will ensure the new version is installed.
