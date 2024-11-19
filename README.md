@@ -62,4 +62,4 @@ make prepare
 make build
 ```
 This will create a ```phatality-<version>.zip``` file in the root directory.  Upload this artifact to `apt.wikimedia.org:/srv/opensearch/`.
-Once the artifact is uploaded, create a patch to bump the phatality version in Puppet.  Once this Puppet patch is merged, Puppet will ensure the new version is installed.
+Once the artifact is uploaded, create a patch to bump the phatality version in Puppet (`profile::opensearch::dashboards::phatality::version`).  Once this Puppet patch is merged, Puppet will ensure the new version is installed.
