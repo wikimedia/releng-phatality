@@ -4,10 +4,10 @@
 
 This adds a custom document renderer which includes two new buttons:
 
-1. + Submit to phabricator
+1. `+` Submit to phabricator
  * Opens the phabricator "Submit Error Code" form with values
    pre-filled with values from the selected log entry
-2. ? Search Phabricator
+2. `?` Search Phabricator
  * Opens the Phabricator search form with a pre-filled query
 
 ---
