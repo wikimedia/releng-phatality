@@ -12,6 +12,7 @@ interface PhatalityDocType {
   errorType: string,
   errorMessage: string,
   requestId: string,
+  phpversion: string,
   version: string
   stackTrace: string,
   previousStackTrace: string,
@@ -32,6 +33,7 @@ export class PhatalityDoc implements PhatalityDocType {
   public errorType: string;
   public errorMessage: string;
   public requestId: string;
+  public phpversion: string;
   public version: string;
   public stackTrace: string;
   public previousStackTrace: string;
@@ -52,6 +54,7 @@ export class PhatalityDoc implements PhatalityDocType {
     this.errorType = doc[this.fieldMap.errorType];
     this.errorMessage = doc[this.fieldMap.errorMessage];
     this.requestId = doc[this.fieldMap.requestId];
+    this.phpversion = doc[this.fieldMap.phpversion];
     this.version = doc[this.fieldMap.version];
     this.stackTrace = doc[this.fieldMap.stackTrace];
     this.previousStackTrace = doc[this.fieldMap.previousStackTrace];
