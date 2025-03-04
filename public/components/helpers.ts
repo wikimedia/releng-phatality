@@ -207,6 +207,7 @@ export function makePhabDesc(doc:PhatalityDoc) {
   }
   let output = markupSection('Error')
     + markupBullet(`${doc.fieldMap.version}: ${doc.version}`)
+    + markupBullet(`timestamp: ${doc.timestamp}`)
     + markupBullet(`${doc.fieldMap.requestId}: \`${doc.requestId}\``)
     + markupBullet(`${markupHyperlink(makeLogstashTimedQueryUrl(doc), `Find ${doc.fieldMap.requestId} in Logstash`)}`)
     + markupCodeBlock(doc.fieldMap.normalizedMessage, doc.normalizedMessage)
