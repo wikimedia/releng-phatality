@@ -1,7 +1,7 @@
 import { PhatalityDoc } from './phatalitydoc';
 import { Stacktrace } from './stacktrace';
 
-const searchUrl = 'https://phabricator.wikimedia.org/search/';
+const searchUrl = 'https://phabricator.wikimedia.org/maniphest/';
 const formUrl = 'https://phabricator.wikimedia.org/maniphest/task/edit/form/46/';
 const logstashDashboardUrl = 'https://logstash.wikimedia.org/app/dashboards#/view/AXFV7JE83bOlOASGccsT';
 
@@ -257,7 +257,7 @@ export function makePhabSearchUrl(doc:PhatalityDoc) {
   const title = makeTitle(doc);
   const stripped = title.replace(/"+/g, ' ').trim();
   const titleEnc = encodeURIComponent('"' + stripped.replace(/\s+/g, '" "') + '"');
-  return `${searchUrl}?search:primary=true&search:scope=open-tasks&query=${titleEnc}#R`;
+  return `${searchUrl}?statuses=open()&group=none&subtypes=bug,error,security&order=newest&query=${titleEnc}#R`;
 }
 
 /**
