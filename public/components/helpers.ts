@@ -257,7 +257,7 @@ export function makePhabSearchUrl(doc:PhatalityDoc) {
   const title = makeTitle(doc);
   const stripped = title.replace(/"+/g, ' ').trim();
   const titleEnc = encodeURIComponent('"' + stripped.replace(/\s+/g, '" "') + '"');
-  return `${searchUrl}?statuses=open()&group=none&subtypes=bug,error,security&order=newest&query=${titleEnc}#R`;
+  return `${searchUrl}?statuses=open()&group=none&subtypes=bug,error,security,default,deadline&order=newest&query=${titleEnc}#R`;
 }
 
 /**
